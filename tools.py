@@ -6,7 +6,7 @@ import torch
 import trimesh
 from PIL import Image
 from typing import Optional
-from diffusers import DiffusionPipeline, QwenImageEditPipeline
+from diffusers import DiffusionPipeline, QwenImageEditPipeline, StableDiffusion3Pipeline
 from hy3dgen.rembg import BackgroundRemover
 from hy3dgen.shapegen import Hunyuan3DDiTFlowMatchingPipeline
 from hy3dgen.texgen import Hunyuan3DPaintPipeline
@@ -20,15 +20,17 @@ def _ensure_parent_dir(path: str) -> None:
 
 def draw_image(prompt: str, output: str):
     print("draw_image:", prompt)
-    drawpipe = DiffusionPipeline.from_pretrained(
-        "stable-diffusion",
-        torch_dtype=torch.float16,
-        use_safetensors=True,
-        variant="fp16",
-    )
-    drawpipe.to("cuda")
 
-    image = drawpipe(prompt=prompt).images[0]
+    pipe = StableDiffusion3Pipeline.from_pretrained(
+        "stable-diffusion-3.5-large-turbo", torch_dtype=torch.bfloat16
+    )
+    pipe = pipe.to("cuda")
+
+    image = pipe(
+        prompt,
+        num_inference_steps=4,
+        guidance_scale=0.0,
+    ).images[0]
 
     print("save image:", output)
     _ensure_parent_dir(output)

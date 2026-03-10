@@ -7,3 +7,4 @@ stable-diffusion
 __pycache__
 
 *.png
+*.glb
