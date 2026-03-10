@@ -57,8 +57,7 @@ def edit_image(image: str, prompt: str, output: str):
     }
 
     with torch.inference_mode():
-        output = pipeline(**inputs)
-        output_image = output.images[0]
+        output_image = pipeline(**inputs).images[0]
 
     print("save image:", output)
     _ensure_parent_dir(output)
@@ -80,12 +79,14 @@ def generate_3d_model(
             "Hunyuan3D-2mv", subfolder="hunyuan3d-dit-v2-mv", variant="fp16"
         )
 
-    if left is None and back is None:
-        images = {"front": front}
-    else:
-        images = {"front": front, "left": left, "back": back}
+    images = {"front": front}
+    if left is not None:
+        images["left"] = left
+    if back is not None:
+        images["back"] = back
 
     for key in images:
+        if images[key] is None: continue
         image = Image.open(images[key]).convert("RGBA")
         if image.mode == "RGB":
             rembg = BackgroundRemover()

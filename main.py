@@ -1,5 +1,5 @@
 from prompt import system_msg, tools_msg
-from tools import draw_image, generate_3d_model, textured_3d_model
+from tools import draw_image, edit_image, generate_3d_model, textured_3d_model
 
 import json
 import os
@@ -53,13 +53,19 @@ def opt_list(collect: defaultdict, name: str, opterate: str, **arguments):
 
 
 def _execute_tool_call(func_name: str, arguments: dict, collects: list) -> str:
+    print("execute tool call", func_name)
+
     if func_name == "opt_list":
         return opt_list(collects, **arguments)
 
     if func_name == "draw_image":
         draw_image(arguments["prompt"], arguments["output"])
         return "success"
-
+    
+    if func_name == "edit_image":
+        edit_image(arguments["image"], arguments["prompt"], arguments["output"])
+        return "success"
+    
     if func_name == "generate_3d_model":
         generate_3d_model(**arguments)
         return "success"

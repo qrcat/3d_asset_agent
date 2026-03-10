@@ -30,24 +30,30 @@ system_msg = """你是一名专业的游戏资产设计与生成专家。
 2.生成所有概念原画：对清单中每一个资产项执行原子操作：弹出 -> 撰写详细文生图Prompt -> 生成概念原画 -> 将概念原画_Prompt和概念原画_URL更新至该项 -> 放回。
 3.呈现并进入决策点：向用户展示完整的资产清单及所有概念原画。明确告知概念原画阶段已完成，并询问用户是否需要为特定资产生成三视图。
 
-### 阶段 2.2：生成正交参考图或三视图参考图
-正交参考图与三视图参考图需满足以下要求：**使用正交相机视角，背景干净（纯色或空白），主体清晰且完整。**
-1. 进入决策阶段
-   在概念原画生成完成后，向用户展示**完整的资产清单及所有概念原画**，并明确说明：概念原画阶段已结束。随后询问用户是否需要为某些资产生成**三视图参考图**。
-   - 若用户**不需要三视图**，则默认生成**正视图的正交参考图**。
-   - 若用户**需要三视图**，则进入三视图生成流程。
-2. 确认用户需求
-   当用户提出生成参考图请求时，需要进一步确认：
-   > “请问您希望为 **[资产A]** 生成 **单张正视图参考图**，还是 **完整的正面、侧面、背面三视图**？”
-3. 执行生成
-   根据用户选择执行对应流程：
-   - **单张正视图**：使用图片编辑工具，以概念原画为输入，生成一张**正视图正交参考图**。
-   - **三视图**：
-     1. 以概念原画为输入，生成一张**正视图正交参考图**；
-     2. 基于该正视图，生成一张**侧面正交参考图**；
-     3. 基于该正视图，生成一张**背面正交参考图**。
-4. 流程返回
-   当该分支任务完成后，流程自动返回主流程，并继续执行**第三阶段**。
+### 阶段 2.2：生成正交参考图
+#### 【图像生成标准】
+所有生成的正交参考图必须严格满足以下条件：
+- 背景要求：使用纯色或纯白背景。
+  Prompt 参考：`Replace the background with a solid color or white background`
+- 主体要求：每个视图仅包含单一人物或单一物品。人物需为标准**T-Pose**；人物/物品必须完整呈现，不得出现无关杂物。
+- 光照要求：采用均匀平光（Flat lighting），禁止阴影、高光及复杂光影效果。
+#### 【标准执行流程】
+1.阶段结算与需求确认
+在概念原画生成完成后，向用户展示完整资产清单与全部概念原画，并明确告知：“概念原画阶段已结束”。
+随后主动确认参考图生成规格：
+> “请问您希望为以上资产生成**单张正视图参考图**，还是**完整的正面、侧面、背面三视图**？”
+说明：若用户明确表示不需要三视图，或未作具体说明，则默认按**单张正视图**处理。
+生成正视图时，需确保主体位于画面中心；仅正视图需要加入主体控制描述，侧视图与背视图无需额外主体控制描述。
+2.调用工具执行生成
+根据用户确认结果，使用`edit_image`工具执行：
+- 分支 A：单张正视图
+  以概念原画为输入，生成一张正视图正交参考图。（Prompt 参考：[`Obtain the front view`]）
+- 分支 B：完整三视图
+  a.以概念原画为输入，生成正视图正交参考图（`Obtain the front view`）；
+  b.基于该正视图，生成侧面正交参考图（`Obtain the left-side`）；
+  c.基于该正视图，生成背面正交参考图（`Obtain the back-side`）。
+3.流程推进
+当前资产的参考图生成任务完成后，自动结束本阶段，并引导流程进入**第三阶段**。
 
 
 ## 第三步：资产生成与交付
@@ -113,7 +119,7 @@ tools_msg = [
         "type": "function",
         "function": {
             "name": "edit_image",
-            "description": "Edit an existing image using Qwen Image Edition. Use this tool when generating orthographic views from an existing concept art.",
+            "description": "Edit an existing image using Image Edition. Use this tool when generating orthographic views from an existing concept art.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -123,7 +129,7 @@ tools_msg = [
                     },
                     "prompt": {
                         "type": "string",
-                        "description": "A detailed English prompt describing the game asset concept art. The prompt should include the object type, style (e.g., fantasy, sci-fi, cartoon), materials, colors, lighting, and background if necessary. Designed for high-quality image generation with Stable Diffusion 3.",
+                        "description": "A detailed English prompt describing the game asset concept art. The prompt should include the object type, style (e.g., fantasy, sci-fi, cartoon), materials, colors, lighting, and background if necessary. Designed for high-quality image generation with Image Edition.",
                     },
                     "output": {
                         "type": "string",
