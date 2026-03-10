@@ -12,7 +12,7 @@ def _try_load_local_key_module() -> None:
     try:
         import key  # noqa: F401
     except ImportError:
-        print("warn: please set DASHSCOPE_API_KEY in environment")
+        print("warn: please set DASHSCOPE_API_KEY in environment, `export DASHSCOPE_API_KEY=xxx`")
 
 
 def opt_list(collect: defaultdict, name: str, opterate: str, **arguments):
@@ -22,10 +22,12 @@ def opt_list(collect: defaultdict, name: str, opterate: str, **arguments):
         value = arguments.get("string")
         if not isinstance(value, str):
             return "parameter string must be a string"
+        print("INSERT", value)
         asset_list.append(value)
         return "success"
     elif opterate == "pop":
         if asset_list:
+            print("POP", asset_list[0])
             return asset_list.pop(0)
         else:
             return "asset_list is empty"
@@ -36,13 +38,17 @@ def opt_list(collect: defaultdict, name: str, opterate: str, **arguments):
         if n < 0 or n >= len(asset_list):
             return f"index out of range: {n}"
         item = asset_list[n]
+        print("GET", item)
         return str(item)
     elif opterate == "len":
+        print("LEN", len(asset_list))
         return str(len(asset_list))
     elif opterate == "clear":
+        print("CLEAR")
         asset_list.clear()
         return "success"
     elif opterate == "list":
+        print("LIST", asset_list)
         return str(asset_list)
 
 

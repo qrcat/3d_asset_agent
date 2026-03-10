@@ -113,7 +113,7 @@ tools_msg = [
         "type": "function",
         "function": {
             "name": "edit_image",
-            "description": "Edit an existing image using Qwen Image Edition.",
+            "description": "Edit an existing image using Qwen Image Edition. Use this tool when generating orthographic views from an existing concept art.",
             "parameters": {
                 "type": "object",
                 "properties": {
