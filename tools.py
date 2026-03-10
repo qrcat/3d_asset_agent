@@ -38,6 +38,8 @@ def draw_image(prompt: str, output: str):
 
 
 def edit_image(image: str, prompt: str, output: str):
+    print("edit_image:", image, prompt)
+    
     pipeline = QwenImageEditPipeline.from_pretrained("Qwen-Image-Edit")
 
     pipeline.to(torch.bfloat16)
