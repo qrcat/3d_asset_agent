@@ -34,8 +34,9 @@ system_msg = """你是一名专业的游戏资产设计与生成专家。
 1.概念原画生成完毕后，进入决策点：向用户展示完整的资产清单及所有概念原画。明确告知概念原画阶段已完成，并询问用户是否需要为特定资产生成三视图，如果不需要，则生成正面的正交参考图。
 2.确认需求：收到请求后，您需向用户确认：“请问您希望为[资产A]生成仅一张正视图，还是完整的正面、侧面、背面三视图？”
 3.执行生成（应用原子操作）：
-  - 选择“正视图”：弹出资产项 -> 生成一张正面正交参考图​ -> 将正交参考图_正面_URL更新至该项 -> 放回。
+  -- 选择“正视图”：弹出资产项 -> 生成一张正面正交参考图​ -> 将正交参考图_正面_URL更新至该项 -> 放回。
   -- 选择“三视图”：弹出资产项 -> 分别生成正面、侧面、背面三张独立的正交参考图​ -> 将对应的三个URL更新至该项 -> 放回。
+  生成图片时，需要使用工具`edit_image`以概念原画为输入，生成正交参考图。
 4.流程返回：此分支任务执行完毕后，流程将自动回到主线程，继续进入第三步。
 
 ## 第三步：资产生成与交付
@@ -50,67 +51,30 @@ tools_msg = [
     {
         "type": "function",
         "function": {
-            "name": "get_asset_list_item",
-            "description": "Retrieve the nth item from `asset_list` by zero-based index `n` without removing it. Returns one text payload item (asset spec, image path, model path, or stage note).",
+            "name": "opt_list",
+            "description": "Unified list operation tool for `asset_list`. Supports `push`, `pop`, `get`, `len`, `clear`, and `list` on the list identified by `name`.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "n": {
-                        "type": "integer",
-                        "description": "Zero-based index of the target item in `asset_list`.",
-                    }
-                },
-                "required": ["n"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "len_asset_list",
-            "description": "Return the number of items currently stored in `asset_list`.",
-            "parameters": {},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "list_asset_list",
-            "description": "Retrieve all current items in `asset_list` without modifying it.",
-            "parameters": {},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "pop_asset_list",
-            "description": "Remove and return the first item from `asset_list` (FIFO, equivalent to popping index 0).",
-            "parameters": {},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "push_asset_list",
-            "description": "Push a new text item into `asset_list`. The value can be an asset specification or any textual interaction data, such as three-view image paths, concept image output paths, GLB output paths, and stage instructions.",
-            "parameters": {
-                "type": "object",
-                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Target list name, use `asset_list`.",
+                    },
+                    "opterate": {
+                        "type": "string",
+                        "description": "Operation to execute. One of: `push`, `pop`, `get`, `len`, `clear`, `list`.",
+                    },
                     "string": {
                         "type": "string",
-                        "description": "Any text payload to be added to `asset_list`, including asset specs, image paths, GLB paths, or process notes.",
+                        "description": "Required when `opterate` is `push`: string value to append.",
+                    },
+                    "n": {
+                        "type": "integer",
+                        "description": "Required when `opterate` is `get`: zero-based index.",
                     },
                 },
-                "required": ["string"],
+                "required": ["name", "opterate"],
             },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "clear_asset_list",
-            "description": "Remove all items from `asset_list` and reset all stored text interaction payloads in the pipeline.",
-            "parameters": {},
         },
     },
     {

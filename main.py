@@ -1,10 +1,11 @@
+from prompt import system_msg, tools_msg
+from tools import draw_image, generate_3d_model, textured_3d_model
+
 import json
 import os
 
 from openai import OpenAI
-
-from prompt import system_msg, tools_msg
-from tools import draw_image, generate_3d_model, textured_3d_model
+from collections import defaultdict
 
 
 def _try_load_local_key_module() -> None:
@@ -14,45 +15,40 @@ def _try_load_local_key_module() -> None:
         print("warn: please set DASHSCOPE_API_KEY in environment")
 
 
-def _execute_tool_call(func_name: str, arguments: dict, asset_list: list) -> str:
-    if func_name == "push_asset_list":
-        value = arguments.get("string")
-        if value is None:
-            return "missing parameter: string"
-        asset_list.append(value)
-        print("insert", value)
-        return "success"
+def opt_list(collect: defaultdict, name: str, opterate: str, **arguments):
+    asset_list: list = collect[name]
 
-    if func_name == "get_asset_list_item":
+    if opterate == "push":
+        value = arguments.get("string")
+        if not isinstance(value, str):
+            return "parameter string must be a string"
+        asset_list.append(value)
+        return "success"
+    elif opterate == "pop":
+        if asset_list:
+            return asset_list.pop(0)
+        else:
+            return "asset_list is empty"
+    elif opterate == "get":
         n = arguments.get("n")
         if not isinstance(n, int):
             return "parameter n must be an integer"
         if n < 0 or n >= len(asset_list):
             return f"index out of range: {n}"
         item = asset_list[n]
-        print(item)
         return str(item)
-
-    if func_name == "len_asset_list":
-        length = len(asset_list)
-        print("asset_list length:", length)
-        return str(length)
-
-    if func_name == "list_asset_list":
-        print(asset_list)
+    elif opterate == "len":
+        return str(len(asset_list))
+    elif opterate == "clear":
+        asset_list.clear()
+        return "success"
+    elif opterate == "list":
         return str(asset_list)
 
-    if func_name == "pop_asset_list":
-        if not asset_list:
-            return "asset_list is empty"
-        item = asset_list.pop(0)
-        print(item)
-        return str(item)
 
-    if func_name == "clear_asset_list":
-        asset_list.clear()
-        print("asset_list cleared")
-        return "success"
+def _execute_tool_call(func_name: str, arguments: dict, collects: list) -> str:
+    if func_name == "opt_list":
+        return opt_list(collects, **arguments)
 
     if func_name == "draw_image":
         draw_image(arguments["prompt"], arguments["output"])
@@ -77,7 +73,7 @@ def main() -> None:
         base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
     )
 
-    asset_list = []
+    collects = defaultdict(list)
     messages = [{"role": "system", "content": system_msg}]
     chat_lock = True
 
@@ -105,7 +101,7 @@ def main() -> None:
                 func_name = tool_call.function.name
                 arguments = json.loads(tool_call.function.arguments)
 
-                tool_result = _execute_tool_call(func_name, arguments, asset_list)
+                tool_result = _execute_tool_call(func_name, arguments, collects)
 
                 tool_message = {
                     "role": "tool",

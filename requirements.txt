@@ -1,1 +1,2 @@
+openai
 git+https://github.com/huggingface/diffusers

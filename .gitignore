@@ -1,8 +1,7 @@
 key.py
 .locks
-Hunyuan3D-2
-Hunyuan3D-2mv
-stable-diffusion
+Hunyuan3D-*
+stable-diffusion*
 
 __pycache__
 
