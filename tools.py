@@ -1,9 +1,10 @@
 import time
 import os
 
-os.environ["SD_MODELS"] = "~"
-os.environ["QWEN_MODELS"] = "~"
-os.environ["HY3DGEN_MODELS"] = "~"
+os.environ["SD_MODELS"] = "/root"
+os.environ["QWEN_MODELS"] = "/root"
+os.environ["HY3DGEN_MODELS"] = "/root"
+
 import torch
 import trimesh
 from PIL import Image
