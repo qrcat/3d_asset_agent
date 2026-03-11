@@ -1,5 +1,6 @@
 import time
 import os
+import json
 
 os.environ["SD_MODELS"] = "/root"
 os.environ["QWEN_MODELS"] = "/root"
@@ -19,6 +20,30 @@ def _ensure_parent_dir(path: str) -> None:
     parent_dir = os.path.dirname(path)
     if parent_dir:
         os.makedirs(parent_dir, exist_ok=True)
+
+
+def list_files(path: str, recursive: bool = False) -> str:
+    print("list_files:", path, "recursive=", recursive)
+
+    if not os.path.exists(path):
+        return f"path not exists: {path}"
+
+    if os.path.isfile(path):
+        return json.dumps([path], ensure_ascii=False)
+
+    files = []
+    if recursive:
+        for root, _, filenames in os.walk(path):
+            for filename in filenames:
+                files.append(os.path.join(root, filename))
+    else:
+        for name in os.listdir(path):
+            full_path = os.path.join(path, name)
+            if os.path.isfile(full_path):
+                files.append(full_path)
+
+    files.sort()
+    return json.dumps(files, ensure_ascii=False)
 
 
 def draw_image(prompt: str, output: str):

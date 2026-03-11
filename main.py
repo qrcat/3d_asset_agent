@@ -1,5 +1,5 @@
 from prompt import system_msg, tools_msg
-from tools import draw_image, edit_image, generate_3d_model, textured_3d_model
+from tools import draw_image, edit_image, generate_3d_model, textured_3d_model, list_files
 
 import json
 import os
@@ -73,6 +73,9 @@ def _execute_tool_call(func_name: str, arguments: dict, collects: list) -> str:
     if func_name == "textured_3d_model":
         textured_3d_model(arguments["image"], arguments["model"], arguments["output"])
         return "success"
+
+    if func_name == "list_files":
+        return list_files(arguments["path"], arguments.get("recursive", False))
 
     return "unknown function"
 

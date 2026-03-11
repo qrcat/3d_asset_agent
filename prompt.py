@@ -201,4 +201,25 @@ tools_msg = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_files",
+            "description": "List files under a directory. Can list only current directory files or recursively all subdirectory files.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": "Directory path to list files from. If a file path is provided, it returns that file path as a single-item list.",
+                    },
+                    "recursive": {
+                        "type": "boolean",
+                        "description": "Optional. If true, list files recursively; if false, list only direct files under the directory.",
+                    },
+                },
+                "required": ["path"],
+            },
+        },
+    },
 ]
