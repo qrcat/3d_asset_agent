@@ -8,3 +8,9 @@ export DASHSCOPE_API_KEY=xxx
 bash scripts/download.sh
 bash scripts/setup.sh
 ```
+
+# test
+
+```bash
+python -m scripts.test
+```
