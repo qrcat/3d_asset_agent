@@ -12,5 +12,5 @@ bash scripts/setup.sh
 # test
 
 ```bash
-python -m scripts.test
+python test.py
 ```
