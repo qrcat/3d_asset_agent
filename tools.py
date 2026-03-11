@@ -1,7 +1,9 @@
 import time
 import os
 
-os.environ["HY3DGEN_MODELS"] = "."
+os.environ["SD_MODELS"] = "~"
+os.environ["QWEN_MODELS"] = "~"
+os.environ["HY3DGEN_MODELS"] = "~"
 import torch
 import trimesh
 from PIL import Image
@@ -22,7 +24,8 @@ def draw_image(prompt: str, output: str):
     print("draw_image:", prompt)
 
     pipe = StableDiffusion3Pipeline.from_pretrained(
-        "stable-diffusion-3.5-large-turbo", torch_dtype=torch.bfloat16
+        os.path.join(os.environ["SD_MODELS"], "stable-diffusion-3.5-large-turbo"),
+        torch_dtype=torch.bfloat16,
     )
     pipe = pipe.to("cuda")
 
@@ -39,8 +42,10 @@ def draw_image(prompt: str, output: str):
 
 def edit_image(image: str, prompt: str, output: str):
     print("edit_image:", image, prompt)
-    
-    pipeline = QwenImageEditPipeline.from_pretrained("Qwen-Image-Edit")
+
+    pipeline = QwenImageEditPipeline.from_pretrained(
+        os.path.join(os.environ["QWEN_MODELS"], "Qwen-Image-Edit")
+    )
 
     pipeline.to(torch.bfloat16)
     pipeline.to("cuda")
@@ -86,7 +91,8 @@ def generate_3d_model(
         images["back"] = back
 
     for key in images:
-        if images[key] is None: continue
+        if images[key] is None:
+            continue
         image = Image.open(images[key]).convert("RGBA")
         if image.mode == "RGB":
             rembg = BackgroundRemover()
